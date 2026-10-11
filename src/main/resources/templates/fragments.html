@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<header class="topbar" th:fragment="nav">
+    <a class="brand" th:href="@{/home}">Result Hub</a>
+    <nav class="navlinks">
+        <th:block sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin}">Dashboard</a>
+            <a th:href="@{/admin/students}">Students</a>
+            <a th:href="@{/admin/courses}">Courses</a>
+            <a th:href="@{/admin/results}">Results</a>
+        </th:block>
+        <th:block sec:authorize="hasRole('STUDENT')">
+            <a th:href="@{/student/results}">My Results</a>
+            <a th:href="@{/student/account}">My Account</a>
+        </th:block>
+    </nav>
+    <div class="account">
+        <span sec:authentication="name"></span>
+        <form th:action="@{/logout}" method="post">
+            <button class="button quiet" type="submit">Log out</button>
+        </form>
+    </div>
+</header>
+<div class="messages" th:fragment="messages">
+    <div class="notice success" th:if="${success}" th:text="${success}"></div>
+    <div class="notice error" th:if="${error}" th:text="${error}"></div>
+</div>
+</body>
+</html>

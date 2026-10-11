@@ -1,0 +1,41 @@
+databases:
+  - name: result-hub-db
+    databaseName: result_hub
+    user: result_hub_user
+    plan: free
+    region: oregon
+
+services:
+  - type: web
+    name: result-hub
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: result-hub-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: result-hub-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: result-hub-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: result-hub-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: result-hub-db
+          property: password
+      - key: BOOTSTRAP_ADMIN_USERNAME
+        value: admin
+      - key: BOOTSTRAP_ADMIN_PASSWORD
+        sync: false
+      - key: SESSION_COOKIE_SECURE
+        value: "true"

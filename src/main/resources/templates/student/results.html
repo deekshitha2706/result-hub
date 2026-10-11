@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Results · Result Hub</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<main class="container">
+    <section class="page-heading"><div><p class="eyebrow">STUDENT PORTAL</p><h1 th:text="${student == null ? 'My results' : 'Hello, ' + student.firstName + '!'}">My results</h1>
+        <p class="muted" th:text="${student == null ? 'Your published academic results.' : 'Roll number ' + student.rollNumber + ' · Your published academic results.'}"></p></div></section>
+    <section class="stats">
+        <article class="stat"><span>Courses recorded</span><strong th:text="${results.size()}"></strong></article>
+        <article class="stat"><span>Average score</span><strong th:text="${average == null ? '—' : #numbers.formatDecimal(average, 1, 1) + '%'}"></strong></article>
+        <article class="stat"><span>Best score</span><strong th:text="${best == null ? '—' : #numbers.formatDecimal(best, 1, 1) + '%'}"></strong></article>
+        <article class="stat"><span>Overall status</span><strong th:text="${results.isEmpty() ? '—' : backlog ? 'Backlog' : 'Pass'}" th:classappend="${backlog ? ' danger-text' : ''}"></strong></article>
+    </section>
+    <section class="panel"><div class="panel-heading"><div><h2>My grade distribution</h2><p class="muted">Results are only visible to your account.</p></div></div>
+        <div class="bars">
+            <div class="bar-row" th:each="entry : ${gradeCounts}">
+                <span class="bar-label" th:text="${entry.key}"></span>
+                <div class="bar-track"><span class="bar-fill" th:style="|width:${entry.value * 100.0 / maxGradeCount}%;|"></span></div>
+                <span class="bar-value" th:text="${entry.value}"></span>
+            </div>
+        </div>
+    </section>
+    <section class="panel"><div class="panel-heading"><div><h2>All my results</h2><p class="muted">Published results for each course</p></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Course</th><th>Marks</th><th>Score</th><th>Grade</th><th>Exam date</th><th>Semester</th><th>Academic year</th></tr></thead>
+            <tbody><tr th:each="result : ${results}"><td th:text="${result.courseName}"></td>
+                <td th:text="|${result.marksObtained} / ${result.totalMarks}|"></td>
+                <td th:text="${#numbers.formatDecimal(result.percentage, 1, 2) + '%'}"></td>
+                <td><span class="grade" th:text="${result.grade}" th:classappend="| grade-${#strings.replace(result.grade, '+', 'plus')}|"></span></td>
+                <td th:text="${result.examDate}"></td><td th:text="${result.semester}"></td><td th:text="${result.academicYear}"></td>
+            </tr><tr th:if="${results.isEmpty()}"><td colspan="7" class="empty">No results have been published yet.</td></tr></tbody>
+        </table></div>
+    </section>
+</main>
+</body></html>

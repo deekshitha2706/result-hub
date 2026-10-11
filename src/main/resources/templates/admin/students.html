@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Students · Result Hub</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<main class="container">
+    <section class="page-heading"><div><p class="eyebrow">ADMINISTRATION</p><h1>Students</h1><p class="muted">Student accounts use their roll number and date of birth to sign in.</p></div></section>
+    <div th:replace="~{fragments :: messages}"></div>
+    <section class="panel">
+        <div class="panel-heading"><div><h2>Enrolled students</h2><p class="muted" th:text="${students.size() + ' student(s)'}"></p></div>
+            <div class="actions">
+                <input type="search" data-table-filter placeholder="Search students…" aria-label="Search students">
+                <form th:action="@{/admin/students/create-logins}" method="post"><button class="button" type="submit">Create missing logins</button></form>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table><thead><tr><th>Roll no.</th><th>Name</th><th>Email</th><th>Phone</th><th>Date of birth</th><th>Gender</th><th>Enrolled</th><th>Actions</th></tr></thead>
+                <tbody><tr th:each="student : ${students}" data-filter-row>
+                    <td class="strong" th:text="${student.rollNumber}"></td>
+                    <td th:text="|${student.firstName} ${student.lastName ?: ''}|"></td><td th:text="${student.email ?: '—'}"></td>
+                    <td th:text="${student.phone ?: '—'}"></td><td th:text="${student.dateOfBirth}"></td>
+                    <td th:text="${student.gender ?: '—'}"></td><td th:text="${student.enrollmentDate}"></td>
+                    <td><form th:action="@{/admin/students/reset-password}" method="post" class="inline-form">
+                        <input type="hidden" name="rollNumber" th:value="${student.rollNumber}">
+                        <button class="button small" type="submit">Reset password</button>
+                    </form></td>
+                </tr><tr th:if="${students.isEmpty()}"><td colspan="8" class="empty">No students added yet.</td></tr></tbody>
+            </table>
+        </div>
+    </section>
+    <section class="panel form-panel">
+        <div class="panel-heading"><div><h2>Add a student</h2><p class="muted">A student login is created automatically.</p></div></div>
+        <form th:action="@{/admin/students}" method="post" class="form-grid">
+            <label>Roll number<input name="rollNumber" maxlength="30" required></label>
+            <label>First name<input name="firstName" maxlength="50" required></label>
+            <label>Last name<input name="lastName" maxlength="50"></label>
+            <label>Email<input type="email" name="email" maxlength="100"></label>
+            <label>Phone<input name="phone" maxlength="20"></label>
+            <label>Date of birth<input type="date" name="dateOfBirth" required></label>
+            <label>Gender<select name="gender"><option value="">Select</option><option>Female</option><option>Male</option><option>Other</option></select></label>
+            <label class="span-2">Address<input name="address" maxlength="255"></label>
+            <div class="span-2"><button class="button primary" type="submit">Save student</button></div>
+        </form>
+    </section>
+</main>
+<script th:src="@{/js/app.js}" defer></script>
+</body></html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard · Result Hub</title><link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<main class="container">
+    <section class="page-heading">
+        <div><p class="eyebrow">ADMINISTRATION</p><h1>Dashboard</h1><p class="muted">An overview of student progress and published results.</p></div>
+        <div class="actions"><a class="button primary" th:href="@{/admin/students}">Add student</a><a class="button" th:href="@{/admin/results}">Add result</a></div>
+    </section>
+    <section class="stats">
+        <article class="stat"><span>Students</span><strong th:text="${students}"></strong></article>
+        <article class="stat"><span>Courses</span><strong th:text="${courses}"></strong></article>
+        <article class="stat"><span>Results</span><strong th:text="${results}"></strong></article>
+        <article class="stat"><span>Average score</span><strong th:text="${average == null ? '—' : #numbers.formatDecimal(average, 1, 1) + '%'}"></strong></article>
+        <article class="stat"><span>Pass rate</span><strong th:text="${passRate == null ? '—' : #numbers.formatDecimal(passRate, 1, 0) + '%'}"></strong></article>
+    </section>
+    <section class="dashboard-grid">
+        <article class="panel">
+            <div class="panel-heading"><div><h2>Grade distribution</h2><p class="muted">Recorded results by grade</p></div></div>
+            <div class="bars">
+                <div class="bar-row" th:each="entry : ${gradeCounts}">
+                    <span class="bar-label" th:text="${entry.key}"></span>
+                    <div class="bar-track"><span class="bar-fill" th:style="|width:${entry.value * 100.0 / maxGradeCount}%;|"></span></div>
+                    <span class="bar-value" th:text="${entry.value}"></span>
+                </div>
+            </div>
+        </article>
+        <article class="panel">
+            <div class="panel-heading"><div><h2>Course averages</h2><p class="muted">Highest average percentages</p></div></div>
+            <div class="bars" th:if="${!topCourses.isEmpty()}">
+                <div class="bar-row" th:each="course : ${topCourses}">
+                    <span class="bar-label course-label" th:text="${course.name}"></span>
+                    <div class="bar-track"><span class="bar-fill teal" th:style="|width:${course.average}%;|"></span></div>
+                    <span class="bar-value" th:text="${#numbers.formatDecimal(course.average, 1, 1) + '%'}"></span>
+                </div>
+            </div>
+            <p class="empty" th:if="${topCourses.isEmpty()}">Course averages will appear after results are recorded.</p>
+        </article>
+    </section>
+    <section class="panel">
+        <div class="panel-heading"><div><h2>Latest results</h2><p class="muted">Most recently recorded exams</p></div><a class="text-link" th:href="@{/admin/results}">All results →</a></div>
+        <div class="table-wrap">
+            <table><thead><tr><th>Student</th><th>Course</th><th>Marks</th><th>Grade</th><th>Exam date</th></tr></thead>
+                <tbody><tr th:each="result : ${latestResults}">
+                    <td th:text="|${result.studentName} (${result.studentRollNumber})|"></td><td th:text="${result.courseName}"></td>
+                    <td th:text="|${result.marksObtained} / ${result.totalMarks}|"></td>
+                    <td><span class="grade" th:text="${result.grade}" th:classappend="| grade-${#strings.replace(result.grade, '+', 'plus')}|"></span></td>
+                    <td th:text="${result.examDate}"></td>
+                </tr><tr th:if="${latestResults.isEmpty()}"><td colspan="5" class="empty">No results recorded yet.</td></tr></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

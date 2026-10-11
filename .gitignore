@@ -1,7 +1,9 @@
 # compiled output
 out/
 *.class
+target/
 db/*.db
 db/*.db-shm
 db/*.db-wal
+db/*.sqbpro
 lib/mysql-connector-*.jar

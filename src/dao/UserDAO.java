@@ -1,6 +1,7 @@
 package dao;
 
 import model.*;
+import security.PasswordHasher;
 
 import java.sql.*;
 
@@ -9,23 +10,40 @@ public class UserDAO {
     // Authenticate user
     @SuppressWarnings("CallToPrintStackTrace")
     public User authenticateUser(String username, String password) {
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+        String sql = "SELECT * FROM users WHERE username = ?";
         User user = null;
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, username);
-            pstmt.setString(2, password);
-            
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
+
+            String storedPassword = null;
+            int userId = 0;
+            String role = null;
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    storedPassword = rs.getString("password");
+                    if (PasswordHasher.matches(password, storedPassword)) {
+                        userId = rs.getInt("user_id");
+                        role = rs.getString("role");
+                    }
+                }
+            }
+            if (role != null) {
                 user = new User();
-                user.setUserId(rs.getInt("user_id"));
-                user.setUsername(rs.getString("username"));
-                user.setPassword(rs.getString("password"));
-                user.setRole(rs.getString("role"));
+                user.setUserId(userId);
+                user.setUsername(username);
+                user.setPassword(password);
+                user.setRole(role);
+                if (PasswordHasher.needsUpgrade(storedPassword)) {
+                    try (PreparedStatement update = conn.prepareStatement(
+                            "UPDATE users SET password = ? WHERE user_id = ?")) {
+                        update.setString(1, PasswordHasher.hash(password));
+                        update.setInt(2, userId);
+                        update.executeUpdate();
+                    }
+                }
             }
             
         } catch (SQLException e) {
@@ -72,7 +90,7 @@ public class UserDAO {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, user.getUsername());
-            pstmt.setString(2, user.getPassword());
+            pstmt.setString(2, PasswordHasher.hash(user.getPassword()));
             pstmt.setString(3, user.getRole());
             return pstmt.executeUpdate() > 0;
 
@@ -85,15 +103,25 @@ public class UserDAO {
     /** Changes a password only if the current one is correct. */
     @SuppressWarnings("CallToPrintStackTrace")
     public boolean changePassword(String username, String oldPassword, String newPassword) {
-        String sql = "UPDATE users SET password = ? WHERE username = ? AND password = ?";
+        String sql = "SELECT user_id, password FROM users WHERE username = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, newPassword);
-            pstmt.setString(2, username);
-            pstmt.setString(3, oldPassword);
-            return pstmt.executeUpdate() > 0;
+            pstmt.setString(1, username);
+            int userId;
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (!rs.next() || !PasswordHasher.matches(oldPassword, rs.getString("password"))) {
+                    return false;
+                }
+                userId = rs.getInt("user_id");
+            }
+            try (PreparedStatement update = conn.prepareStatement(
+                    "UPDATE users SET password = ? WHERE user_id = ?")) {
+                update.setString(1, PasswordHasher.hash(newPassword));
+                update.setInt(2, userId);
+                return update.executeUpdate() > 0;
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -109,7 +137,7 @@ public class UserDAO {
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, newPassword);
+            pstmt.setString(1, PasswordHasher.hash(newPassword));
             pstmt.setString(2, username);
             pstmt.setString(3, ROLE_STUDENT);
             return pstmt.executeUpdate() > 0;

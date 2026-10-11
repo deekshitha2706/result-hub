@@ -13,6 +13,7 @@ public class Result {
     private int semester;
     private String academicYear;
     private String studentName;
+    private String studentRollNumber;
     private String courseName;
     
     public Result() {
@@ -60,6 +61,9 @@ public class Result {
     
     public String getStudentName() { return studentName; }
     public void setStudentName(String studentName) { this.studentName = studentName; }
+
+    public String getStudentRollNumber() { return studentRollNumber; }
+    public void setStudentRollNumber(String studentRollNumber) { this.studentRollNumber = studentRollNumber; }
     
     public String getCourseName() { return courseName; }
     public void setCourseName(String courseName) { this.courseName = courseName; }

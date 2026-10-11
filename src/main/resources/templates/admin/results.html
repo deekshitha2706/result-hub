@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Results · Result Hub</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body>
+<div th:replace="~{fragments :: nav}"></div>
+<main class="container">
+    <section class="page-heading"><div><p class="eyebrow">ADMINISTRATION</p><h1>Results</h1><p class="muted">Search by roll number or browse the full results list.</p></div></section>
+    <div th:replace="~{fragments :: messages}"></div>
+    <section class="panel">
+        <form th:action="@{/admin/results}" method="get" class="search-row">
+            <label>Student roll number<input name="rollNumber" th:value="${rollNumber}" placeholder="All students"></label>
+            <button class="button" type="submit">Search</button><a class="button quiet" th:href="@{/admin/results}">Show all</a>
+        </form>
+        <div class="table-wrap"><table><thead><tr><th>Student</th><th>Roll no.</th><th>Course</th><th>Marks</th><th>Score</th><th>Grade</th><th>Date</th><th>Semester</th><th>Year</th></tr></thead>
+            <tbody><tr th:each="result : ${results}">
+                <td th:text="${result.studentName}"></td><td th:text="${result.studentRollNumber}"></td><td th:text="${result.courseName}"></td>
+                <td th:text="|${result.marksObtained} / ${result.totalMarks}|"></td>
+                <td th:text="${#numbers.formatDecimal(result.percentage, 1, 2) + '%'}"></td>
+                <td><span class="grade" th:text="${result.grade}" th:classappend="| grade-${#strings.replace(result.grade, '+', 'plus')}|"></span></td>
+                <td th:text="${result.examDate}"></td><td th:text="${result.semester}"></td><td th:text="${result.academicYear}"></td>
+            </tr><tr th:if="${results.isEmpty()}"><td colspan="9" class="empty">No matching results.</td></tr></tbody>
+        </table></div>
+    </section>
+    <section class="panel form-panel"><div class="panel-heading"><div><h2>Record a result</h2><p class="muted">The grade is calculated from marks and total marks.</p></div></div>
+        <form th:action="@{/admin/results}" method="post" class="form-grid">
+            <label>Student<select name="rollNumber" required><option value="">Choose a student</option>
+                <option th:each="student : ${students}" th:value="${student.rollNumber}" th:text="|${student.rollNumber} · ${student.firstName} ${student.lastName ?: ''}|"></option>
+            </select></label>
+            <label>Course<select name="courseId" required><option value="">Choose a course</option>
+                <option th:each="course : ${courses}" th:value="${course.courseId}" th:text="|${course.courseCode} · ${course.courseName}|"></option>
+            </select></label>
+            <label>Marks obtained<input type="number" name="marksObtained" min="0" step="0.01" required></label>
+            <label>Total marks<input type="number" name="totalMarks" min="0.01" step="0.01" value="100" required></label>
+            <label>Exam date<input type="date" name="examDate" th:value="${today}" required></label>
+            <label>Semester<input type="number" name="semester" min="1" max="12" value="1" required></label>
+            <label>Academic year<input name="academicYear" maxlength="20" th:value="${academicYear}" required></label>
+            <div class="span-2"><button class="button primary" type="submit">Save result</button></div>
+        </form>
+    </section>
+</main>
+</body></html>

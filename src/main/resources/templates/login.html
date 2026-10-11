@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign in · Result Hub</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="login-page">
+<main class="login-card">
+    <a class="brand login-brand" th:href="@{/login}">Result Hub</a>
+    <p class="eyebrow">STUDENT RESULTS, MADE SIMPLE</p>
+    <h1>Welcome back</h1>
+    <p class="muted">Sign in with your administrator account or student roll number.</p>
+    <div class="notice error" th:if="${param.error}">Invalid username or password.</div>
+    <div class="notice success" th:if="${param.logout}">You are signed out.</div>
+    <form th:action="@{/login}" method="post" class="form-stack">
+        <label>Username<input name="username" autocomplete="username" required autofocus></label>
+        <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+        <button class="button primary wide" type="submit">Sign in</button>
+    </form>
+    <p class="login-help">Students: your first password is your date of birth in ddMMyyyy format.</p>
+</main>
+</body>
+</html>
