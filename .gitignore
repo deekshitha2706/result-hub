@@ -1,0 +1,7 @@
+# compiled output
+out/
+*.class
+db/*.db
+db/*.db-shm
+db/*.db-wal
+lib/mysql-connector-*.jar
